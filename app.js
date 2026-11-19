@@ -200,21 +200,7 @@
     return { months: months, t: now + months * AVG_MONTH };
   }
 
-  var etaGoal  = etaFor(GOAL);
-  var etaPrice = PRICE > 0 ? etaFor(PRICE) : { unknown: true };
-
-  function etaText(eta) {
-    if (eta.done) return "Reached";
-    if (eta.unknown) return "—";
-    return fmtMonthYear(eta.t);
-  }
-
-  function etaSub(eta) {
-    if (eta.done) return "goal met";
-    if (eta.unknown) return basis > 0 ? "too far out to call" : "add an entry to project";
-    var m = Math.round(eta.months);
-    return (m <= 1 ? "about a month" : "about " + m + " months") + " " + basisLabel;
-  }
+  var etaGoal = etaFor(GOAL);
 
   /* ------------------------------------------------------------ sidebar/hero */
 
@@ -236,65 +222,14 @@
   set("hLeft",      compact(remaining));
   set("hLeftFull",  remaining > 0 ? full(remaining) + " to go" : "goal reached");
 
-  // --- Primary bar: 100% of its width is the goal.
+  // The bar's full width is the goal.
   set("barGoalLabel", compact(GOAL));
   var goalFillPct = Math.min(progress, 100);
 
   var bar = $("bar");
-  bar.setAttribute("aria-valuenow", Math.min(progress, 100).toFixed(1));
+  bar.setAttribute("aria-valuenow", goalFillPct.toFixed(1));
   bar.setAttribute("aria-valuetext", compact(saved) + " of " + compact(GOAL) +
                                      " goal — " + fmtPct(progress));
-
-  // --- Secondary bar: 100% of its width is the real house price, with a
-  //     marker showing where the goal sits on that scale.
-  var pricePct = PRICE > 0 ? pct(saved, PRICE) : 0;
-  var priceFillPct = Math.min(pricePct, 100);
-
-  if (PRICE > 0) {
-    set("barPriceLabel", compact(PRICE));
-    var pb = $("barPrice");
-    pb.setAttribute("aria-valuenow", priceFillPct.toFixed(1));
-    pb.setAttribute("aria-valuetext", compact(saved) + " of the " + compact(PRICE) +
-                                      " house price — " + fmtPct(pricePct));
-
-    var goalOnPrice = pct(GOAL, PRICE);
-    var marker = $("barMarker");
-    if (goalOnPrice > 4 && goalOnPrice < 97) {
-      marker.style.left = goalOnPrice + "%";
-      set("barMarkerLabel", compact(GOAL) + " goal");
-    } else {
-      marker.hidden = true;
-    }
-  } else {
-    $("priceRow").hidden = true;
-  }
-
-  // Note under the bar.
-  (function heroNote() {
-    var parts = [];
-    parts.push("<strong>" + fmtPct(progress) + "</strong> of the " + compact(GOAL) +
-               " goal is in.");
-    if (remaining > 0) {
-      parts.push("<strong>" + full(remaining) + "</strong> left.");
-    }
-    if (PRICE > 0 && gapPrice > 0) {
-      parts.push("The house itself is " + compact(PRICE) + " — " +
-                 "<strong>" + full(gapPrice) + "</strong> from where you are now (" +
-                 fmtPct(pct(saved, PRICE)) + " of the real price).");
-    }
-    $("heroNote").innerHTML = parts.join(" ");
-  })();
-
-  set("dAvg",    compact(avgMonth));
-  set("dAvgSub", "since " + fmtMonthYear(firstT));
-  set("dPace",   paceMonth > 0 ? compact(paceMonth) : "—");
-  set("dPaceSub", paceMonth > 0 ? "last " + WINDOW_DAYS + " days"
-                                : "nothing in " + WINDOW_DAYS + " days");
-
-  set("dEta",    etaText(etaGoal));
-  set("dEtaSub", etaSub(etaGoal));
-  set("dEtaPrice",    PRICE > 0 ? etaText(etaPrice) : "—");
-  set("dEtaPriceSub", PRICE > 0 ? etaSub(etaPrice) : "no price set");
 
   set("histHint", points.length + (points.length === 1 ? " entry" : " entries") +
                   " · newest first");
@@ -577,7 +512,6 @@
   function fillBars() {
     ringFill.style.strokeDashoffset = String(CIRC * (1 - ringShown));
     $("barFill").style.width = goalFillPct + "%";
-    if (PRICE > 0) $("barPriceFill").style.width = priceFillPct + "%";
   }
 
   // Two frames so the starting values are committed and the CSS transition

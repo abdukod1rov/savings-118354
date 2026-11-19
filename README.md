@@ -110,16 +110,8 @@ your own disk, which works exactly the same.
 and the gap to that price. Plus a progress ring and the light/dark/auto theme
 button.
 
-**Hero** — saved and still-to-go in large type, then two progress bars, each on
-its own honest scale: the top one measures against the 400 mln goal, the bottom
-one against the 600 mln real price with a marker showing where the goal falls.
-
-**Pace cards**
-- *Average per month* — everything saved, divided by the months since your
-  first entry.
-- *Current pace* — what actually went in over the last 90 days, per month.
-- *Goal reached around* / *Full price around* — projected from the current
-  pace, or from the average if nothing went in recently. The card says which.
+**Hero** — saved and still-to-go in large type, then a progress bar whose full
+width is the 400 mln goal.
 
 **Chart** — balance over time, hand-drawn in SVG (no chart library, nothing
 loaded from a CDN). Dashed line is the goal; a faint line projects forward when
