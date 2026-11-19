@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>House Savings</title>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============================ SIDEBAR ============================ -->
+  <aside class="sidebar">
+    <header class="brand">
+      <span class="brand-mark" aria-hidden="true">🏡</span>
+      <div>
+        <h1>House Savings</h1>
+        <p class="brand-sub">Progress to the sweet spot</p>
+      </div>
+    </header>
+
+    <div class="ring-wrap">
+      <svg class="ring" viewBox="0 0 120 120" role="img" aria-labelledby="ringLabel">
+        <title id="ringLabel">Percent of goal saved</title>
+        <circle class="ring-track" cx="60" cy="60" r="52"></circle>
+        <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"></circle>
+      </svg>
+      <div class="ring-text">
+        <strong id="ringPct">—</strong>
+        <span>of goal</span>
+      </div>
+    </div>
+
+    <dl class="stats">
+      <div class="stat stat-accent">
+        <dt>Saved</dt>
+        <dd id="sSaved">—</dd>
+      </div>
+      <div class="stat stat-warn">
+        <dt>Left to goal</dt>
+        <dd id="sLeft">—</dd>
+      </div>
+      <div class="stat">
+        <dt>Goal</dt>
+        <dd id="sGoal">—</dd>
+      </div>
+      <div class="stat">
+        <dt>Complete</dt>
+        <dd id="sPct">—</dd>
+      </div>
+      <div class="stat stat-divider">
+        <dt>Real house price</dt>
+        <dd id="sPrice">—</dd>
+      </div>
+      <div class="stat">
+        <dt>Gap to real price</dt>
+        <dd id="sGapPrice">—</dd>
+      </div>
+    </dl>
+
+    <footer class="side-foot">
+      <button id="themeBtn" class="theme-btn" type="button" aria-live="polite">
+        <span id="themeIcon" aria-hidden="true">◐</span>
+        <span id="themeLabel">Auto theme</span>
+      </button>
+      <p class="updated">Last entry <span id="lastDate">—</span></p>
+    </footer>
+  </aside>
+
+  <!-- ============================== MAIN ============================= -->
+  <main class="main">
+
+    <!-- Hero: saved / remaining / progress bar -->
+    <section class="hero" aria-labelledby="heroH">
+      <h2 id="heroH" class="sr-only">Overall progress</h2>
+
+      <div class="hero-nums">
+        <div class="hero-block">
+          <span class="hero-label">Saved so far</span>
+          <strong class="hero-big" id="hSaved">—</strong>
+          <span class="hero-sub" id="hSavedFull">—</span>
+        </div>
+        <div class="hero-block hero-right">
+          <span class="hero-label">Still to go</span>
+          <strong class="hero-big hero-big-warn" id="hLeft">—</strong>
+          <span class="hero-sub" id="hLeftFull">—</span>
+        </div>
+      </div>
+
+      <div class="bar-wrap">
+        <!-- Primary: progress against the 400 mln goal -->
+        <div class="bar-row">
+          <span class="bar-cap">goal</span>
+          <div class="bar" role="progressbar" aria-label="Progress to the goal"
+               aria-valuemin="0" aria-valuemax="100" id="bar">
+            <div class="bar-fill" id="barFill"></div>
+          </div>
+          <span class="bar-end" id="barGoalLabel">—</span>
+        </div>
+
+        <!-- Secondary: the same saving measured against the real house price -->
+        <div class="bar-row bar-row-sub" id="priceRow">
+          <span class="bar-cap">real price</span>
+          <div class="bar bar-sub" role="progressbar" aria-label="Progress to the real house price"
+               aria-valuemin="0" aria-valuemax="100" id="barPrice">
+            <div class="bar-fill bar-fill-sub" id="barPriceFill"></div>
+            <div class="bar-marker" id="barMarker">
+              <span class="bar-marker-label" id="barMarkerLabel">goal</span>
+            </div>
+          </div>
+          <span class="bar-end" id="barPriceLabel">—</span>
+        </div>
+      </div>
+
+      <p class="hero-note" id="heroNote"></p>
+    </section>
+
+    <!-- Derived figures -->
+    <section class="cards" aria-label="Pace and projection">
+      <div class="card">
+        <span class="card-label">Average per month</span>
+        <strong class="card-val" id="dAvg">—</strong>
+        <span class="card-sub" id="dAvgSub">—</span>
+      </div>
+      <div class="card">
+        <span class="card-label">Current pace</span>
+        <strong class="card-val" id="dPace">—</strong>
+        <span class="card-sub" id="dPaceSub">—</span>
+      </div>
+      <div class="card">
+        <span class="card-label">Goal reached around</span>
+        <strong class="card-val" id="dEta">—</strong>
+        <span class="card-sub" id="dEtaSub">—</span>
+      </div>
+      <div class="card">
+        <span class="card-label">Full price around</span>
+        <strong class="card-val" id="dEtaPrice">—</strong>
+        <span class="card-sub" id="dEtaPriceSub">—</span>
+      </div>
+    </section>
+
+    <!-- Chart -->
+    <section class="panel" aria-labelledby="chartH">
+      <div class="panel-head">
+        <h2 id="chartH">Balance over time</h2>
+        <span class="panel-hint" id="chartHint"></span>
+      </div>
+      <div class="chart-host" id="chartHost"></div>
+    </section>
+
+    <!-- History -->
+    <section class="panel" aria-labelledby="histH">
+      <div class="panel-head">
+        <h2 id="histH">History</h2>
+        <span class="panel-hint" id="histHint"></span>
+      </div>
+      <div class="table-scroll">
+        <table class="hist">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col" class="num">Added</th>
+              <th scope="col" class="num">Balance</th>
+              <th scope="col" class="num">% of goal</th>
+              <th scope="col">Note</th>
+            </tr>
+          </thead>
+          <tbody id="histBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="foot-note">
+      Edit <code>data.js</code>, commit, push — this page recalculates everything from it.
+    </p>
+  </main>
+</div>
+
+<div id="dataError" class="data-error" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

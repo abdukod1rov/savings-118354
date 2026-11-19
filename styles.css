@@ -1,0 +1,433 @@
+/* ===========================================================================
+   House savings tracker — styles
+   Light + dark, phone first. No build step, no external assets.
+   =========================================================================== */
+
+/* ---- Light theme (default) ---------------------------------------------- */
+:root {
+  --bg:        #f4f6f9;
+  --panel:     #ffffff;
+  --panel-2:   #f8fafc;
+  --side:      #10243b;
+  --side-text: #e6eef7;
+  --side-dim:  #8fa7c0;
+  --side-line: #1e3a5c;
+
+  --text:      #16202c;
+  --text-dim:  #5a6a7d;
+  --line:      #e2e8f0;
+
+  --accent:    #1f9d61;
+  --accent-sl: #37c57f;
+  --warn:      #d9822b;
+  --price:     #7a8aa0;
+
+  --shadow:    0 1px 2px rgb(16 32 48 / .06), 0 4px 16px rgb(16 32 48 / .05);
+  --radius:    14px;
+}
+
+/* ---- Dark theme --------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #0b1017;
+    --panel:     #141c26;
+    --panel-2:   #1a232f;
+    --side:      #0e1620;
+    --side-text: #e3ebf4;
+    --side-dim:  #7e92a8;
+    --side-line: #22303f;
+
+    --text:      #e6edf5;
+    --text-dim:  #93a3b6;
+    --line:      #232e3c;
+
+    --accent:    #34c77f;
+    --accent-sl: #58e39b;
+    --warn:      #e9a44d;
+    --price:     #8698ae;
+
+    --shadow:    0 1px 2px rgb(0 0 0 / .4), 0 6px 20px rgb(0 0 0 / .35);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:        #0b1017;
+  --panel:     #141c26;
+  --panel-2:   #1a232f;
+  --side:      #0e1620;
+  --side-text: #e3ebf4;
+  --side-dim:  #7e92a8;
+  --side-line: #22303f;
+
+  --text:      #e6edf5;
+  --text-dim:  #93a3b6;
+  --line:      #232e3c;
+
+  --accent:    #34c77f;
+  --accent-sl: #58e39b;
+  --warn:      #e9a44d;
+  --price:     #8698ae;
+
+  --shadow:    0 1px 2px rgb(0 0 0 / .4), 0 6px 20px rgb(0 0 0 / .35);
+}
+
+/* ---- Base --------------------------------------------------------------- */
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2 { margin: 0; font-weight: 650; letter-spacing: -.01em; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .9em;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: .1em .35em;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---- Layout ------------------------------------------------------------- */
+.layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.main {
+  min-width: 0;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ---- Sidebar ------------------------------------------------------------ */
+.sidebar {
+  background: var(--side);
+  color: var(--side-text);
+  padding: 26px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark { font-size: 28px; line-height: 1; }
+.brand h1 { font-size: 19px; }
+.brand-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--side-dim); }
+
+/* Progress ring */
+.ring-wrap { position: relative; display: grid; place-items: center; padding: 4px 0; }
+.ring { width: 170px; height: 170px; transform: rotate(-90deg); }
+.ring-track {
+  fill: none; stroke: var(--side-line); stroke-width: 11;
+}
+.ring-fill {
+  fill: none;
+  stroke: var(--accent-sl);
+  stroke-width: 11;
+  stroke-linecap: round;
+  stroke-dasharray: 326.7;         /* 2 * pi * 52 */
+  stroke-dashoffset: 326.7;
+  transition: stroke-dashoffset .9s cubic-bezier(.3, .8, .3, 1);
+}
+.ring-text { position: absolute; text-align: center; line-height: 1.15; }
+.ring-text strong { display: block; font-size: 34px; font-weight: 680; letter-spacing: -.02em; }
+.ring-text span  { font-size: 11.5px; color: var(--side-dim); text-transform: uppercase; letter-spacing: .09em; }
+
+/* Stat list */
+.stats { margin: 0; display: flex; flex-direction: column; gap: 1px; }
+.stat {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--side-line);
+}
+.stat:last-child { border-bottom: 0; }
+.stat-divider { margin-top: 12px; border-top: 1px solid var(--side-line); }
+.stat dt { font-size: 13px; color: var(--side-dim); }
+.stat dd { margin: 0; font-size: 15px; font-weight: 600; text-align: right; }
+.stat-accent dd { color: var(--accent-sl); }
+.stat-warn   dd { color: var(--warn); }
+
+.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+
+.theme-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent;
+  color: var(--side-dim);
+  border: 1px solid var(--side-line);
+  border-radius: 9px;
+  padding: 8px 12px;
+  font: inherit; font-size: 13px;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.theme-btn:hover { color: var(--side-text); border-color: var(--side-dim); }
+.theme-btn:focus-visible { outline: 2px solid var(--accent-sl); outline-offset: 2px; }
+
+.updated { margin: 0; font-size: 12px; color: var(--side-dim); }
+
+/* ---- Hero --------------------------------------------------------------- */
+.hero {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 26px 26px;
+}
+
+.hero-nums { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; }
+.hero-block { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hero-right { text-align: right; }
+.hero-label {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--text-dim); font-weight: 600;
+}
+.hero-big {
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 680;
+  letter-spacing: -.025em;
+  line-height: 1.05;
+  color: var(--accent);
+}
+.hero-big-warn { color: var(--warn); }
+.hero-sub { font-size: 13.5px; color: var(--text-dim); }
+
+/* Progress bars — each on its own honest scale.
+   Top bar: 100% = the goal. Bottom bar: 100% = the real house price. */
+.bar-wrap { margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+.bar-cap {
+  font-size: 11.5px; color: var(--text-dim); font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.bar-end { font-size: 12.5px; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
+
+.bar {
+  position: relative;
+  height: 18px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-sl));
+  transition: width .9s cubic-bezier(.3, .8, .3, 1);
+}
+
+.bar-sub { height: 11px; }
+.bar-fill-sub { background: var(--price); opacity: .75; }
+.bar-row-sub .bar-cap, .bar-row-sub .bar-end { opacity: .85; }
+
+/* Where the goal sits on the real-price bar */
+.bar-marker {
+  position: absolute; top: -5px; bottom: -5px;
+  width: 2px;
+  background: var(--warn);
+  border-radius: 2px;
+}
+.bar-marker-label {
+  position: absolute; top: -17px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 10.5px; font-weight: 700; color: var(--warn);
+  white-space: nowrap; letter-spacing: .02em;
+}
+
+.hero-note { margin: 18px 0 0; font-size: 14px; color: var(--text-dim); }
+.hero-note strong { color: var(--text); font-weight: 600; }
+
+/* ---- Derived cards ------------------------------------------------------ */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+/* Below this the four cards read better as a tidy 2x2 than as 3 + 1. */
+@media (max-width: 1240px) {
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.card-label {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--text-dim); font-weight: 600;
+}
+.card-val { font-size: 22px; font-weight: 650; letter-spacing: -.015em; }
+.card-sub { font-size: 12.5px; color: var(--text-dim); }
+
+/* ---- Panels ------------------------------------------------------------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 22px 22px;
+}
+.panel-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.panel-head h2 { font-size: 16px; }
+.panel-hint { font-size: 12.5px; color: var(--text-dim); }
+
+.chart-host { width: 100%; }
+.chart-host svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Chart internals */
+.c-grid      { stroke: var(--line); stroke-width: 1; }
+.c-axis-text { fill: var(--text-dim); font-size: 11px; }
+.c-area      { fill: url(#cGrad); }
+.c-line      { fill: none; stroke: var(--accent); stroke-width: 2.5;
+               stroke-linejoin: round; stroke-linecap: round; }
+.c-dot       { fill: var(--panel); stroke: var(--accent); stroke-width: 2.5; }
+.c-goal      { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.c-goal-text { fill: var(--warn); font-size: 11px; font-weight: 600; }
+.c-price     { stroke: var(--price); stroke-width: 1.5; stroke-dasharray: 2 4; }
+.c-price-text{ fill: var(--price); font-size: 11px; font-weight: 600; }
+.c-proj      { fill: none; stroke: var(--accent); stroke-width: 2;
+               stroke-dasharray: 4 5; opacity: .55; }
+.c-hit       { fill: transparent; cursor: default; }
+
+/* ---- History table ------------------------------------------------------ */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.hist { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.hist th, .hist td { padding: 10px 12px; text-align: left; white-space: nowrap; }
+.hist th {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-dim); font-weight: 600;
+  border-bottom: 1px solid var(--line);
+}
+.hist td { border-bottom: 1px solid var(--line); }
+.hist tbody tr:last-child td { border-bottom: 0; }
+.hist tbody tr:hover { background: var(--panel-2); }
+.hist .num { text-align: right; }
+.hist .add  { color: var(--accent); font-weight: 600; }
+.hist .bal  { font-weight: 600; }
+.hist .note { color: var(--text-dim); font-size: 13.5px; white-space: normal; }
+.hist .tag {
+  display: inline-block; font-size: 11px; font-weight: 600;
+  color: var(--price); border: 1px solid var(--line);
+  border-radius: 5px; padding: 1px 5px; margin-right: 6px;
+}
+
+.foot-note { margin: 0; font-size: 13px; color: var(--text-dim); text-align: center; }
+
+/* ---- Data error --------------------------------------------------------- */
+.data-error {
+  position: fixed; inset: auto 16px 16px 16px;
+  background: #7f1d1d; color: #fff;
+  padding: 14px 16px; border-radius: 10px;
+  font-size: 14px; line-height: 1.45;
+  box-shadow: 0 6px 24px rgb(0 0 0 / .3);
+  z-index: 50;
+}
+.data-error code { background: rgb(255 255 255 / .15); border-color: transparent; color: #fff; }
+
+/* ---- Phone / tablet ----------------------------------------------------- */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+
+  .sidebar {
+    padding: 20px 16px;
+    gap: 18px;
+  }
+
+  /* Side by side: ring left, stats right — keeps the phone header compact */
+  .sidebar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "brand brand"
+      "ring  stats"
+      "foot  foot";
+    align-items: center;
+    column-gap: 18px;
+    row-gap: 16px;
+  }
+  .brand     { grid-area: brand; }
+  .ring-wrap { grid-area: ring; padding: 0; }
+  .stats     { grid-area: stats; }
+  .side-foot { grid-area: foot; }
+
+  .ring { width: 124px; height: 124px; }
+  .ring-text strong { font-size: 26px; }
+  .stat { padding: 7px 0; }
+  .stat dt { font-size: 12.5px; }
+  .stat dd { font-size: 14px; }
+  .stat-divider { margin-top: 8px; }
+
+  .main { padding: 16px; gap: 16px; }
+  .hero { padding: 20px 18px 22px; }
+  .panel { padding: 18px 16px 20px; }
+
+  .hero-nums { gap: 14px; }
+  .hero-block { flex: 1 1 140px; }
+  .hero-right { text-align: left; }
+
+  .side-foot { margin-top: 4px; flex-direction: row; align-items: center;
+               justify-content: space-between; }
+}
+
+@media (max-width: 440px) {
+  .main { padding: 12px; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .card { padding: 13px 14px; }
+  .card-val { font-size: 19px; }
+  .hist th, .hist td { padding: 9px 9px; }
+  .hist { font-size: 13.5px; }
+  .bar-row { grid-template-columns: 58px minmax(0, 1fr) auto; gap: 8px; }
+  .bar-cap { font-size: 10px; letter-spacing: .03em; }
+  .bar-end { font-size: 11.5px; }
+}
+
+/* On a phone the "% of goal" column is what gets dropped first — the
+   overall percentage is already up in the sidebar. */
+@media (max-width: 560px) {
+  .hist th:nth-child(4), .hist td:nth-child(4) { display: none; }
+}
+
+/* ---- Reduced motion ----------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .ring-fill, .bar-fill { transition: none; }
+}
+
+/* ---- Print -------------------------------------------------------------- */
+@media print {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { background: #fff; color: #000; }
+  .theme-btn { display: none; }
+  .panel, .hero, .card { box-shadow: none; break-inside: avoid; }
+}
