@@ -234,7 +234,6 @@ code {
 }
 .is-accent dd { color: var(--rail-acc); }
 .is-warm   dd { color: var(--rail-warm); }
-.is-parted { margin-top: 14px; border-top: 1px solid var(--rail-hair); }
 
 .rail-foot {
   margin-top: auto;
@@ -484,7 +483,6 @@ code {
   .figure { padding: 8px 0; min-width: 0; }
   .figure dt { font-size: 12.5px; }
   .figure dd { font-size: 14px; }
-  .is-parted { margin-top: 0; border-top: 0; }
   .figure:nth-last-child(-n + 2) { border-bottom: 0; }
 
   /* Keep the two headline figures side by side — stacking them pushed the

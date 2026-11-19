@@ -22,8 +22,9 @@ window.SAVINGS = {
   // The goal you are tracking against — your "sweet spot".
   goal: 400_000_000,
 
-  // What the house actually costs. Shown alongside, so the real number
-  // stays in view without becoming the bar you measure yourself against.
+  // What the house actually costs. Not shown as a figure any more — it only
+  // draws a line on the chart once savings reach the top of its scale.
+  // Set it to 0 to drop it completely.
   housePrice: 600_000_000,
 
   currency: "so'm",

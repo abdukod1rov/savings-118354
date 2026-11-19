@@ -208,7 +208,6 @@
   var lastT     = points[points.length - 1].t;
   var firstT    = points[0].t;
   var remaining = Math.max(0, GOAL - saved);
-  var gapPrice  = PRICE > 0 ? Math.max(0, PRICE - saved) : 0;
   var progress  = pct(saved, GOAL);
   var now       = Date.now();
 
@@ -254,13 +253,11 @@
 
   /* --------------------------------------------------------------- rail/hero */
 
-  set("sSaved",    compact(saved));
-  set("sLeft",     compact(remaining));
-  set("sGoal",     compact(GOAL));
-  set("sPct",      fmtPct(progress));
-  set("sPrice",    PRICE > 0 ? compact(PRICE) : "—");
-  set("sGapPrice", PRICE > 0 ? compact(gapPrice) : "—");
-  set("lastDate",  fmtDate(lastT));
+  set("sSaved",   compact(saved));
+  set("sLeft",    compact(remaining));
+  set("sGoal",    compact(GOAL));
+  set("sPct",     fmtPct(progress));
+  set("lastDate", fmtDate(lastT));
 
   countUp("ringPct", progress, function (v) { return Math.round(v) + "%"; });
   countUp("hSaved",  saved,     compactHTML, true);

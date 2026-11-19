@@ -5,8 +5,9 @@
 A single static page that tracks progress toward buying a house.
 
 - **Goal:** 400 000 000 so'm — the number being tracked against.
-- **Real house price:** 600 000 000 so'm — shown alongside, on its own scale,
-  so the real number stays in view without becoming the bar.
+- **Real house price:** 600 000 000 so'm — kept in `data.js` but no longer
+  shown as a figure. It only appears as a line on the chart once savings get
+  close enough for it to fall on the scale.
 
 Everything on the page — totals, percentages, the chart, the pace, the
 projected date — is calculated from one file: **`data.js`**. There is no build
@@ -73,7 +74,7 @@ housePrice: 600_000_000,  // what the house actually costs
 currency: "so'm",
 ```
 
-Set `housePrice: 0` to hide the real-price row entirely.
+Set `housePrice: 0` to drop the real price altogether, including its chart line.
 
 ### If you mistype something
 
@@ -120,9 +121,8 @@ your own disk, which works exactly the same.
 
 ## What the page shows
 
-**Sidebar** — saved, left to goal, the goal, % complete, the real house price,
-and the gap to that price. Plus a progress ring and the light/dark/auto theme
-button.
+**Sidebar** — saved, left to goal, the goal and % complete, plus a progress
+ring and the light/dark/auto theme button.
 
 **Hero** — saved and still-to-go in large type, then a progress bar whose full
 width is the 400 mln goal.
