@@ -28,11 +28,12 @@ window.SAVINGS = {
 
   currency: "so'm",
 
-  // ---- REPLACE THESE THREE PLACEHOLDER ENTRIES WITH YOUR REAL ONES -------
   entries: [
-    { date: "2026-09-01", amount: 45_000_000, note: "placeholder — replace me" },
-    { date: "2026-10-01", amount: 18_000_000, note: "placeholder — replace me" },
-    { date: "2026-11-01", amount: 21_500_000, note: "placeholder — replace me" },
+    // Where you stood when this tracker started. `balance` states the total
+    // outright, so it is not counted as money saved in the last 90 days.
+    { date: "2026-11-19", balance: 150_000_000, note: "starting balance" },
+
+    // From here on, one line per deposit:
+    //   { date: "2026-12-05", amount: 12_000_000 },
   ],
-  // -----------------------------------------------------------------------
 };

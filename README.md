@@ -11,8 +11,8 @@ projected date — is calculated from one file: **`data.js`**. There is no build
 step, no `npm install`, and no dependencies. Open `index.html` in a browser and
 it works, whether from a local file or from GitHub Pages.
 
-> **The three entries in `data.js` right now are placeholders.** Replace them
-> with your real numbers — see below.
+`data.js` holds one real entry: an opening balance of 150 000 000 so'm on
+2026-11-19. Every deposit from here gets appended below it.
 
 ---
 
@@ -22,9 +22,7 @@ Open **`data.js`** and add one line at the bottom of the `entries` list:
 
 ```js
 entries: [
-  { date: "2026-09-01", amount: 45_000_000 },
-  { date: "2026-10-01", amount: 18_000_000 },
-  { date: "2026-11-01", amount: 21_500_000 },
+  { date: "2026-11-19", balance: 150_000_000, note: "starting balance" },
   { date: "2026-12-05", amount: 12_000_000 },   // <-- the new line
 ],
 ```
