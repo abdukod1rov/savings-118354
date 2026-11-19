@@ -1,5 +1,7 @@
 # House savings tracker
 
+**Live:** https://abdukod1rov.github.io/savings-118354/
+
 A single static page that tracks progress toward buying a house.
 
 - **Goal:** 400 000 000 so'm — the number being tracked against.
@@ -82,6 +84,15 @@ amount). Fix it, reload.
 ---
 
 ## Turning on GitHub Pages
+
+Already done for this repository — it is live at the URL above, and every
+`git push` to `main` redeploys it. The steps below are for setting it up
+again somewhere else.
+
+> **If a Pages URL redirects somewhere that will not load,** check whether
+> `abdukod1rov.github.io` has a `CNAME` file. A custom domain on the user
+> site redirects *every* project page to that domain, so if the domain is
+> not registered and pointing at GitHub, all of them break at once.
 
 1. Create a repository on GitHub and push this folder to it:
 
