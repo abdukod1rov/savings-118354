@@ -214,22 +214,27 @@
 
   /* --------------------------------------------------------- derived figures */
 
-  // Only money added SINCE tracking began counts toward the rate of saving.
-  // The first entry is an opening balance — savings from before this page
-  // existed — and counting it would pass off years of saving as one month's.
-  var addedSince = Math.max(saved - points[0].balance, 0);
+  // What counts toward the rate of saving is money that went in during the
+  // tracked span. A `balance` entry never does: as the first entry it is an
+  // opening balance (savings from before this page existed, which would pass
+  // off years of saving as one month's), and later it is a correction.
+  // A first entry that is a deposit, though, is real money in — counting it
+  // out would understate the pace.
+  var openingIsSnapshot = points[0].isReset;
+  var addedSince = openingIsSnapshot
+    ? Math.max(saved - points[0].balance, 0)
+    : saved;
 
   var spanMs     = Math.max(now, lastT) - firstT;
   var spanMonths = Math.max(spanMs / AVG_MONTH, 0.5);
   var avgMonth   = addedSince / spanMonths;
 
-  // Current pace: real deposits over the last 90 days. The opening balance is
-  // not one, and nor is a `balance` entry — that is a correction, not money in.
+  // Current pace: real deposits over the last 90 days.
   var WINDOW_DAYS = 90;
   var since = now - WINDOW_DAYS * DAY;
   var recentAdded = 0;
-  points.forEach(function (p, i) {
-    if (i === 0 || p.isReset) return;
+  points.forEach(function (p) {
+    if (p.isReset) return;
     if (p.t >= since && p.added > 0) recentAdded += p.added;
   });
   var paceMonth = recentAdded / (WINDOW_DAYS / 30.436875);

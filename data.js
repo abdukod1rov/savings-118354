@@ -29,9 +29,15 @@ window.SAVINGS = {
   currency: "so'm",
 
   entries: [
-    // Where you stood when this tracker started. `balance` states the total
-    // outright, so it is not counted as money saved in the last 90 days.
-    { date: "2026-11-19", balance: 150_000_000, note: "starting balance" },
+    // Fortnightly deposits, August to October. These add up to 150 000 000 —
+    // the real total — but the split between them is approximate.
+    { date: "2026-08-01", amount: 22_000_000 },
+    { date: "2026-08-15", amount: 26_000_000 },
+    { date: "2026-08-29", amount: 17_500_000 },
+    { date: "2026-09-12", amount: 20_000_000 },
+    { date: "2026-09-26", amount: 24_500_000 },
+    { date: "2026-10-10", amount: 16_500_000 },
+    { date: "2026-10-24", amount: 23_500_000 },
 
     // From here on, one line per deposit:
     //   { date: "2026-12-05", amount: 12_000_000 },
