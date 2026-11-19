@@ -1,383 +1,528 @@
 /* ===========================================================================
-   House savings tracker — styles
-   Light + dark, phone first. No build step, no external assets.
+   House savings tracker
+
+   Design notes, so later edits keep the same logic:
+   · Structure comes from space and hairlines, not from boxes. There is one
+     card-like surface (the rail) and nothing else is outlined.
+   · One accent (mint) carries "money in". One warm tone carries "still to go".
+     Nothing else is coloured.
+   · The numbers are the interface, so they get the weight, the tight tracking
+     and the size. Labels shrink back out of the way.
+   · The rail stays dark in both themes — it is the one constant surface.
    =========================================================================== */
 
-/* ---- Light theme (default) ---------------------------------------------- */
+/* ---- Tokens: light ------------------------------------------------------ */
 :root {
-  --bg:        #f4f6f9;
-  --panel:     #ffffff;
-  --panel-2:   #f8fafc;
-  --side:      #10243b;
-  --side-text: #e6eef7;
-  --side-dim:  #8fa7c0;
-  --side-line: #1e3a5c;
+  color-scheme: light;
 
-  --text:      #16202c;
-  --text-dim:  #5a6a7d;
-  --line:      #e2e8f0;
+  --canvas:    #fbfbf9;   /* warm paper, not blue-grey */
+  --raised:    #ffffff;
+  --hair:      #e7e6e1;
+  --hair-soft: #f0efeb;
 
-  --accent:    #1f9d61;
-  --accent-sl: #37c57f;
-  --warn:      #d9822b;
-  --price:     #7a8aa0;
+  --ink:       #16181c;
+  --ink-2:     #5c616b;
+  /* These three carry 10.5–14.5px text on near-white, so they are set for
+     4.5:1, not for how they look next to each other. Measured, not guessed. */
+  --ink-3:     #6b707a;
+  --accent:    #0a7a58;
+  --warm:      #8f5c1d;
 
-  --shadow:    0 1px 2px rgb(16 32 48 / .06), 0 4px 16px rgb(16 32 48 / .05);
-  --radius:    14px;
+  --accent-2:  #35c795;
+
+  /* The rail is dark in both themes. */
+  --rail-top:  #0d0f13;
+  --rail-bot:  #121519;
+  --rail-ink:  #eceef1;
+  --rail-dim:  #868d99;
+  --rail-hair: #1f242c;
+  --rail-acc:  #4fd1a1;
+  --rail-warm: #e0a561;
+
+  --r:         18px;
+  --ease:      cubic-bezier(.22, .68, .3, 1);
 }
 
-/* ---- Dark theme --------------------------------------------------------- */
+/* ---- Tokens: dark ------------------------------------------------------- */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:        #0b1017;
-    --panel:     #141c26;
-    --panel-2:   #1a232f;
-    --side:      #0e1620;
-    --side-text: #e3ebf4;
-    --side-dim:  #7e92a8;
-    --side-line: #22303f;
+    color-scheme: dark;
 
-    --text:      #e6edf5;
-    --text-dim:  #93a3b6;
-    --line:      #232e3c;
+    --canvas:    #0a0b0e;
+    --raised:    #101217;
+    --hair:      #1d2027;
+    --hair-soft: #15181d;
 
-    --accent:    #34c77f;
-    --accent-sl: #58e39b;
-    --warn:      #e9a44d;
-    --price:     #8698ae;
+    --ink:       #eceef2;
+    --ink-2:     #959ba6;
+    --ink-3:     #7c828d;
 
-    --shadow:    0 1px 2px rgb(0 0 0 / .4), 0 6px 20px rgb(0 0 0 / .35);
+    --accent:    #4fd1a1;
+    --accent-2:  #7ee8c0;
+    --warm:      #e0a561;
+
+    --rail-top:  #0d0f13;
+    --rail-bot:  #101317;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg:        #0b1017;
-  --panel:     #141c26;
-  --panel-2:   #1a232f;
-  --side:      #0e1620;
-  --side-text: #e3ebf4;
-  --side-dim:  #7e92a8;
-  --side-line: #22303f;
+  color-scheme: dark;
 
-  --text:      #e6edf5;
-  --text-dim:  #93a3b6;
-  --line:      #232e3c;
+  --canvas:    #0a0b0e;
+  --raised:    #101217;
+  --hair:      #1d2027;
+  --hair-soft: #15181d;
 
-  --accent:    #34c77f;
-  --accent-sl: #58e39b;
-  --warn:      #e9a44d;
-  --price:     #8698ae;
+  --ink:       #eceef2;
+  --ink-2:     #959ba6;
+  --ink-3:     #7c828d;
 
-  --shadow:    0 1px 2px rgb(0 0 0 / .4), 0 6px 20px rgb(0 0 0 / .35);
+  --accent:    #4fd1a1;
+  --accent-2:  #7ee8c0;
+  --warm:      #e0a561;
+
+  --rail-top:  #0d0f13;
+  --rail-bot:  #101317;
 }
 
 /* ---- Base --------------------------------------------------------------- */
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font: 400 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font: 400 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, sans-serif;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-h1, h2 { margin: 0; font-weight: 650; letter-spacing: -.01em; }
+h1, h2 { margin: 0; font-weight: 600; letter-spacing: -.015em; text-wrap: balance; }
+p { margin: 0; }
+
+button { font: inherit; touch-action: manipulation; }
 
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: .9em;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
+  font-size: .875em;
+  background: var(--hair-soft);
   border-radius: 5px;
-  padding: .1em .35em;
+  padding: .15em .4em;
 }
+
+::selection { background: var(--accent); color: #04120d; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
 }
 
-/* ---- Layout ------------------------------------------------------------- */
+/* Keyboard users land here first. */
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 100;
+  background: var(--accent); color: #04120d;
+  padding: 10px 16px; border-radius: 10px;
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  transition: top .18s var(--ease);
+}
+.skip:focus { top: 12px; }
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---- Shell -------------------------------------------------------------- */
 .layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 324px minmax(0, 1fr);
   min-height: 100vh;
+  min-height: 100svh;
 }
 
+/* ---- Rail --------------------------------------------------------------- */
+.rail {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  padding: 32px 28px calc(28px + env(safe-area-inset-bottom));
+  padding-left: calc(28px + env(safe-area-inset-left));
+  background: linear-gradient(180deg, var(--rail-top), var(--rail-bot));
+  color: var(--rail-ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.brand { display: flex; align-items: center; gap: 13px; }
+
+.mark {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  background: rgb(79 209 161 / .11);
+  color: var(--rail-acc);
+  flex: none;
+}
+.mark svg { width: 21px; height: 21px; }
+
+.brand-text { min-width: 0; }
+.brand h1 { font-size: 16.5px; letter-spacing: -.01em; }
+.brand-sub {
+  display: block;
+  font-size: 12px; color: var(--rail-dim); margin-top: 1px;
+}
+
+/* Dial. The rail's slack belongs at the bottom, above the footer — splitting
+   it around the dial leaves two dead gaps and the column reads unbalanced. */
+.dial {
+  position: relative;
+  display: grid; place-items: center;
+  padding: 6px 0 2px;
+}
+.dial-svg { width: min(196px, 62%); height: auto; display: block; }
+
+/* Rotation lives on a <g>, not the <svg>, so the box is unambiguous. */
+.dial-rotor { transform: rotate(-90deg); transform-origin: 80px 80px; }
+
+.dial-track { fill: none; stroke: var(--rail-hair); stroke-width: 9; }
+.dial-fill {
+  fill: none;
+  stroke: var(--rail-acc);
+  stroke-width: 9;
+  stroke-linecap: round;
+  stroke-dasharray: 427.26;            /* 2·π·68 */
+  stroke-dashoffset: 427.26;
+  transition: stroke-dashoffset 1.1s var(--ease);
+}
+
+.dial-read { position: absolute; text-align: center; line-height: 1.1; }
+.dial-read strong {
+  display: block;
+  font-size: 40px; font-weight: 600; letter-spacing: -.035em;
+}
+.dial-read span {
+  font-size: 10.5px; color: var(--rail-dim);
+  text-transform: uppercase; letter-spacing: .15em;
+}
+
+/* Figure list — hairlines only */
+.figures { margin: 0; }
+.figure {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rail-hair);
+}
+.figure:last-child { border-bottom: 0; }
+.figure dt { font-size: 13px; color: var(--rail-dim); }
+.figure dd {
+  margin: 0; font-size: 15px; font-weight: 550;
+  letter-spacing: -.015em; text-align: right;
+}
+.is-accent dd { color: var(--rail-acc); }
+.is-warm   dd { color: var(--rail-warm); }
+.is-parted { margin-top: 14px; border-top: 1px solid var(--rail-hair); }
+
+.rail-foot {
+  margin-top: auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+
+.theme {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: transparent;
+  color: var(--rail-dim);
+  border: 1px solid var(--rail-hair);
+  border-radius: 999px;
+  padding: 7px 14px 7px 11px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color .16s var(--ease), border-color .16s var(--ease);
+}
+.theme:hover { color: var(--rail-ink); border-color: var(--rail-dim); }
+
+.theme-dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 1.5px solid currentColor;
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+:root[data-theme="light"] .theme-dot { background: currentColor; }
+:root[data-theme="dark"]  .theme-dot { background: transparent; }
+
+.stamp { font-size: 12px; color: var(--rail-dim); }
+
+/* ---- Main --------------------------------------------------------------- */
 .main {
   min-width: 0;
-  padding: 28px;
+  padding: 56px clamp(24px, 5vw, 72px) 72px;
+  padding-right: calc(clamp(24px, 5vw, 72px) + env(safe-area-inset-right));
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 64px;
+  max-width: 1180px;
 }
-
-/* ---- Sidebar ------------------------------------------------------------ */
-.sidebar {
-  background: var(--side);
-  color: var(--side-text);
-  padding: 26px 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand-mark { font-size: 28px; line-height: 1; }
-.brand h1 { font-size: 19px; }
-.brand-sub { margin: 2px 0 0; font-size: 12.5px; color: var(--side-dim); }
-
-/* Progress ring */
-.ring-wrap { position: relative; display: grid; place-items: center; padding: 4px 0; }
-.ring { width: 170px; height: 170px; transform: rotate(-90deg); }
-.ring-track {
-  fill: none; stroke: var(--side-line); stroke-width: 11;
-}
-.ring-fill {
-  fill: none;
-  stroke: var(--accent-sl);
-  stroke-width: 11;
-  stroke-linecap: round;
-  stroke-dasharray: 326.7;         /* 2 * pi * 52 */
-  stroke-dashoffset: 326.7;
-  transition: stroke-dashoffset .9s cubic-bezier(.3, .8, .3, 1);
-}
-.ring-text { position: absolute; text-align: center; line-height: 1.15; }
-.ring-text strong { display: block; font-size: 34px; font-weight: 680; letter-spacing: -.02em; }
-.ring-text span  { font-size: 11.5px; color: var(--side-dim); text-transform: uppercase; letter-spacing: .09em; }
-
-/* Stat list */
-.stats { margin: 0; display: flex; flex-direction: column; gap: 1px; }
-.stat {
-  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--side-line);
-}
-.stat:last-child { border-bottom: 0; }
-.stat-divider { margin-top: 12px; border-top: 1px solid var(--side-line); }
-.stat dt { font-size: 13px; color: var(--side-dim); }
-.stat dd { margin: 0; font-size: 15px; font-weight: 600; text-align: right; }
-.stat-accent dd { color: var(--accent-sl); }
-.stat-warn   dd { color: var(--warn); }
-
-.side-foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
-
-.theme-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: transparent;
-  color: var(--side-dim);
-  border: 1px solid var(--side-line);
-  border-radius: 9px;
-  padding: 8px 12px;
-  font: inherit; font-size: 13px;
-  cursor: pointer;
-  transition: color .15s, border-color .15s, background .15s;
-}
-.theme-btn:hover { color: var(--side-text); border-color: var(--side-dim); }
-.theme-btn:focus-visible { outline: 2px solid var(--accent-sl); outline-offset: 2px; }
-
-.updated { margin: 0; font-size: 12px; color: var(--side-dim); }
 
 /* ---- Hero --------------------------------------------------------------- */
-.hero {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 24px 26px 26px;
+.eyebrow {
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .155em;
+  color: var(--ink-3);
 }
 
-.hero-nums { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; }
-.hero-block { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.hero-right { text-align: right; }
-.hero-label {
-  font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em;
-  color: var(--text-dim); font-weight: 600;
+.hero-grid {
+  display: flex; flex-wrap: wrap; align-items: flex-end;
+  gap: 28px 56px;
+  justify-content: space-between;
 }
-.hero-big {
-  font-size: clamp(30px, 6vw, 44px);
-  font-weight: 680;
-  letter-spacing: -.025em;
-  line-height: 1.05;
+.hero-lead, .hero-trail { min-width: 0; }
+
+.xl {
+  font-size: clamp(46px, 8.5vw, 92px);
+  font-weight: 600;
+  letter-spacing: -.045em;
+  line-height: .95;
+  margin-top: 14px;
   color: var(--accent);
 }
-.hero-big-warn { color: var(--warn); }
-.hero-sub { font-size: 13.5px; color: var(--text-dim); }
-
-/* Progress bar — its full width is the goal. */
-.bar-wrap { margin-top: 24px; }
-
-.bar-row {
-  display: grid;
-  grid-template-columns: 76px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 11px;
+.lg {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -.035em;
+  line-height: 1;
+  margin-top: 12px;
+  color: var(--warm);
 }
-.bar-cap {
-  font-size: 11.5px; color: var(--text-dim); font-weight: 600;
-  text-transform: uppercase; letter-spacing: .06em;
-}
-.bar-end { font-size: 12.5px; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
 
-.bar {
+/* The unit rides at a fraction of the numeral's size — at 90px "mln" set
+   solid with the figure shouts louder than the number it qualifies. */
+.unit {
+  font-size: .34em;
+  font-weight: 550;
+  letter-spacing: .01em;
+  margin-left: .28em;
+  color: var(--ink-3);
+  vertical-align: .22em;
+}
+.lg .unit { font-size: .42em; vertical-align: .18em; }
+.sub { font-size: 13.5px; color: var(--ink-3); margin-top: 10px; }
+
+/* Progress rule */
+.track-wrap { margin-top: 44px; }
+.track {
   position: relative;
-  height: 18px;
-  background: var(--panel-2);
-  border: 1px solid var(--line);
+  height: 8px;
   border-radius: 999px;
+  background: var(--hair);
+  overflow: hidden;
 }
-.bar-fill {
-  height: 100%;
-  width: 0;
+.track-fill {
+  position: absolute; inset: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-sl));
-  transition: width .9s cubic-bezier(.3, .8, .3, 1);
+  /* Full width, slid into place: transform only, so no layout per frame. */
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  transition: transform 1.1s var(--ease);
 }
+.track-legend {
+  display: flex; justify-content: space-between; gap: 16px;
+  margin-top: 12px;
+  font-size: 12.5px; color: var(--ink-3);
+}
+.track-legend span:first-child { color: var(--ink-2); font-weight: 550; }
 
-/* ---- Panels ------------------------------------------------------------- */
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px 22px 22px;
-}
-.panel-head {
+/* ---- Blocks ------------------------------------------------------------- */
+.block { display: flex; flex-direction: column; gap: 22px; }
+
+.block-head {
   display: flex; align-items: baseline; justify-content: space-between;
-  gap: 12px; flex-wrap: wrap;
-  margin-bottom: 14px;
+  gap: 16px; flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--hair);
 }
-.panel-head h2 { font-size: 16px; }
-.panel-hint { font-size: 12.5px; color: var(--text-dim); }
+.block-head h2 { font-size: 13px; letter-spacing: .02em; }
+.block-note { font-size: 12.5px; color: var(--ink-3); }
 
+/* ---- Chart -------------------------------------------------------------- */
 .chart-host { width: 100%; }
 .chart-host svg { display: block; width: 100%; height: auto; overflow: visible; }
 
-/* Chart internals */
-.c-grid      { stroke: var(--line); stroke-width: 1; }
-.c-axis-text { fill: var(--text-dim); font-size: 11px; }
-.c-area      { fill: url(#cGrad); }
-.c-line      { fill: none; stroke: var(--accent); stroke-width: 2.5;
-               stroke-linejoin: round; stroke-linecap: round; }
-.c-dot       { fill: var(--panel); stroke: var(--accent); stroke-width: 2.5; }
-.c-goal      { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 5 4; }
-.c-goal-text { fill: var(--warn); font-size: 11px; font-weight: 600; }
-.c-price     { stroke: var(--price); stroke-width: 1.5; stroke-dasharray: 2 4; }
-.c-price-text{ fill: var(--price); font-size: 11px; font-weight: 600; }
-.c-proj      { fill: none; stroke: var(--accent); stroke-width: 2;
-               stroke-dasharray: 4 5; opacity: .55; }
-.c-hit       { fill: transparent; cursor: default; }
+.c-grid       { stroke: var(--hair-soft); stroke-width: 1; }
+.c-base       { stroke: var(--hair); stroke-width: 1; }
+.c-axis       { fill: var(--ink-3); font-size: 10.5px; letter-spacing: .02em; }
+.c-area       { fill: url(#cFill); }
+.c-line       { fill: none; stroke: var(--accent); stroke-width: 2;
+                stroke-linejoin: round; stroke-linecap: round; }
+.c-dot-halo   { fill: var(--canvas); }
+.c-dot        { fill: var(--accent); }
+.c-goal       { stroke: var(--warm); stroke-width: 1; stroke-dasharray: 3 4; opacity: .7; }
+.c-goal-text  { fill: var(--warm); font-size: 10.5px; font-weight: 600; }
+.c-proj       { fill: none; stroke: var(--accent); stroke-width: 1.5;
+                stroke-dasharray: 3 5; opacity: .4; }
+.c-hit        { fill: transparent; }
 
-/* ---- History table ------------------------------------------------------ */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* ---- History ------------------------------------------------------------ */
+.table-wrap { overflow-x: auto; overscroll-behavior-x: contain; }
 
 .hist { width: 100%; border-collapse: collapse; font-size: 14.5px; }
-.hist th, .hist td { padding: 10px 12px; text-align: left; white-space: nowrap; }
+.hist th, .hist td { padding: 13px 16px; text-align: left; white-space: nowrap; }
+.hist th:first-child, .hist td:first-child { padding-left: 0; }
+.hist th:last-child,  .hist td:last-child  { padding-right: 0; }
+
 .hist th {
-  font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--text-dim); font-weight: 600;
-  border-bottom: 1px solid var(--line);
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: var(--ink-3);
+  padding-top: 0; padding-bottom: 11px;
 }
-.hist td { border-bottom: 1px solid var(--line); }
-.hist tbody tr:last-child td { border-bottom: 0; }
-.hist tbody tr:hover { background: var(--panel-2); }
+.hist td { border-top: 1px solid var(--hair); }
 .hist .num { text-align: right; }
-.hist .add  { color: var(--accent); font-weight: 600; }
-.hist .bal  { font-weight: 600; }
-.hist .note { color: var(--text-dim); font-size: 13.5px; white-space: normal; }
-.hist .tag {
-  display: inline-block; font-size: 11px; font-weight: 600;
-  color: var(--price); border: 1px solid var(--line);
-  border-radius: 5px; padding: 1px 5px; margin-right: 6px;
+.hist .add { color: var(--accent); font-weight: 550; }
+.hist .bal { font-weight: 600; letter-spacing: -.01em; }
+.hist .note {
+  color: var(--ink-3); font-size: 13.5px;
+  white-space: normal; max-width: 34ch;
+  overflow-wrap: break-word;
+}
+.hist tbody tr { transition: background .14s var(--ease); }
+.hist tbody tr:hover { background: var(--hair-soft); }
+
+.tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .09em;
+  color: var(--ink-2);
+  border: 1px solid var(--hair);
+  border-radius: 5px;
+  padding: 2px 6px;
+  margin-right: 8px;
+  vertical-align: 1px;
 }
 
-.foot-note { margin: 0; font-size: 13px; color: var(--text-dim); text-align: center; }
+.colophon { font-size: 12.5px; color: var(--ink-3); }
 
-/* ---- Data error --------------------------------------------------------- */
-.data-error {
-  position: fixed; inset: auto 16px 16px 16px;
+/* ---- Alert -------------------------------------------------------------- */
+.alert {
+  position: fixed;
+  left: 16px; right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  max-width: 640px;
+  margin-inline: auto;
   background: #7f1d1d; color: #fff;
-  padding: 14px 16px; border-radius: 10px;
-  font-size: 14px; line-height: 1.45;
-  box-shadow: 0 6px 24px rgb(0 0 0 / .3);
+  padding: 15px 18px;
+  border-radius: 12px;
+  font-size: 14px; line-height: 1.5;
+  box-shadow: 0 10px 34px rgb(0 0 0 / .32);
   z-index: 50;
 }
-.data-error code { background: rgb(255 255 255 / .15); border-color: transparent; color: #fff; }
+.alert code { background: rgb(255 255 255 / .16); color: #fff; }
 
-/* ---- Phone / tablet ----------------------------------------------------- */
-@media (max-width: 900px) {
+/* ---- Tablet and below ---------------------------------------------------
+   The rail becomes a compact header. The dial moves up beside the wordmark
+   rather than sitting next to the figures, where its height never matched
+   theirs and left a dead column on a phone. */
+@media (max-width: 940px) {
   .layout { grid-template-columns: 1fr; }
 
-  .sidebar {
-    padding: 20px 16px;
-    gap: 18px;
-  }
-
-  /* Side by side: ring left, stats right — keeps the phone header compact */
-  .sidebar {
+  .rail {
+    position: static;
+    height: auto;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "brand brand"
-      "ring  stats"
-      "foot  foot";
+      "brand   dial"
+      "figures figures"
+      "foot    foot";
     align-items: center;
-    column-gap: 18px;
-    row-gap: 16px;
+    column-gap: 20px;
+    row-gap: 20px;
+    padding: 22px 20px;
+    padding-left: calc(20px + env(safe-area-inset-left));
+    padding-right: calc(20px + env(safe-area-inset-right));
   }
-  .brand     { grid-area: brand; }
-  .ring-wrap { grid-area: ring; padding: 0; }
-  .stats     { grid-area: stats; }
-  .side-foot { grid-area: foot; }
+  .brand    { grid-area: brand; }
+  .dial     { grid-area: dial; padding: 0; }
+  .figures  { grid-area: figures; }
+  .rail-foot{ grid-area: foot; margin-top: 0; }
 
-  .ring { width: 124px; height: 124px; }
-  .ring-text strong { font-size: 26px; }
-  .stat { padding: 7px 0; }
-  .stat dt { font-size: 12.5px; }
-  .stat dd { font-size: 14px; }
-  .stat-divider { margin-top: 8px; }
+  .dial-svg { width: 110px; }
+  .dial-read strong { font-size: 24px; }
+  .dial-read span { font-size: 9px; letter-spacing: .12em; }
 
-  .main { padding: 16px; gap: 16px; }
-  .hero { padding: 20px 18px 22px; }
-  .panel { padding: 18px 16px 20px; }
+  .main {
+    padding: 32px 20px 56px;
+    padding-left: calc(20px + env(safe-area-inset-left));
+    padding-right: calc(20px + env(safe-area-inset-right));
+    gap: 46px;
+  }
 
-  .hero-nums { gap: 14px; }
-  .hero-block { flex: 1 1 140px; }
-  .hero-right { text-align: left; }
-
-  .side-foot { margin-top: 4px; flex-direction: row; align-items: center;
-               justify-content: space-between; }
+  .hero-grid { gap: 22px 32px; }
+  .track-wrap { margin-top: 32px; }
 }
 
-@media (max-width: 440px) {
-  .main { padding: 12px; }
-  .hist th, .hist td { padding: 9px 9px; }
-  .hist { font-size: 13.5px; }
-  .bar-row { grid-template-columns: 58px minmax(0, 1fr) auto; gap: 8px; }
-  .bar-cap { font-size: 10px; letter-spacing: .03em; }
-  .bar-end { font-size: 11.5px; }
-}
-
-/* On a phone the "% of goal" column is what gets dropped first — the
-   overall percentage is already up in the sidebar. */
 @media (max-width: 560px) {
+  /* Six stacked rows pushed the headline figure off the first screen. The
+     pairs that result read naturally: saved/left, goal/complete, price/gap. */
+  .figures {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 22px;
+  }
+  .figure { padding: 8px 0; min-width: 0; }
+  .figure dt { font-size: 12.5px; }
+  .figure dd { font-size: 14px; }
+  .is-parted { margin-top: 0; border-top: 0; }
+  .figure:nth-last-child(-n + 2) { border-bottom: 0; }
+
+  /* Keep the two headline figures side by side — stacking them pushed the
+     chart a full screen down. */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 16px 14px;
+  }
+  .hero-trail { text-align: right; }
+  .xl { font-size: clamp(36px, 11vw, 54px); margin-top: 10px; }
+  .lg { font-size: clamp(21px, 6vw, 28px); margin-top: 8px; }
+  .sub { font-size: 11.5px; margin-top: 7px; }
+  .track-wrap { margin-top: 26px; }
+
+  .hist { font-size: 13.5px; }
+  .hist th, .hist td { padding: 11px 12px; }
+  /* The overall percentage is already in the rail. */
   .hist th:nth-child(4), .hist td:nth-child(4) { display: none; }
+  .hist .note { max-width: 20ch; }
 }
 
-/* ---- Reduced motion ----------------------------------------------------- */
+/* ---- Motion preferences ------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .ring-fill, .bar-fill { transition: none; }
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
 }
 
 /* ---- Print -------------------------------------------------------------- */
 @media print {
   .layout { grid-template-columns: 1fr; }
-  .sidebar { background: #fff; color: #000; }
-  .theme-btn { display: none; }
-  .panel, .hero { box-shadow: none; break-inside: avoid; }
+  .rail { background: none; color: #000; height: auto; position: static; }
+  .figure dt, .figure dd, .stamp, .brand-sub { color: #000; }
+  .theme, .skip { display: none; }
+  .main { padding: 0; gap: 28px; }
+  .block { break-inside: avoid; }
 }

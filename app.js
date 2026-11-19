@@ -13,6 +13,9 @@
   var DAY = 86400000;
   var AVG_MONTH = 30.436875 * DAY;      // mean Gregorian month
 
+  var REDUCE = window.matchMedia &&
+               window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   function $(id) { return document.getElementById(id); }
 
   function fail(msg) {
@@ -30,22 +33,22 @@
     if (mo < 1 || mo > 12 || d < 1 || d > 31) return NaN;
     var t = Date.UTC(y, mo - 1, d);
     var chk = new Date(t);
-    // Rejects things like 2026-02-31.
     if (chk.getUTCMonth() !== mo - 1 || chk.getUTCDate() !== d) return NaN;
     return t;
   }
 
   function fmtDate(t) {
     var d = new Date(t);
-    return d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
+    return d.getUTCDate() + " " + MONTHS[d.getUTCMonth()] +
+           " " + d.getUTCFullYear();
   }
 
   function fmtMonthYear(t) {
     var d = new Date(t);
-    return MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
+    return MONTHS[d.getUTCMonth()] + " " + d.getUTCFullYear();
   }
 
-  /* 124500000 -> "124 500 000" (thin spaces, not locale-dependent) */
+  /* 124500000 -> "124 500 000" (narrow no-break spaces, locale-independent) */
   function groups(n) {
     var s = String(Math.round(Math.abs(n)));
     var out = "";
@@ -56,22 +59,36 @@
     return (n < 0 ? "-" : "") + s + out;
   }
 
-  var CUR = "so'm";
+  var CUR = "so’m";                 // curly apostrophe
 
-  function full(n) { return groups(n) + " " + CUR; }
+  function full(n) { return groups(n) + " " + CUR; }
 
   /* 124500000 -> "124.5 mln" ; 1250000000 -> "1.25 mlrd" */
   function compact(n) {
     var a = Math.abs(n), sign = n < 0 ? "-" : "";
-    if (a >= 1e9) return sign + trim(a / 1e9, 2) + " mlrd";
-    if (a >= 1e6) return sign + trim(a / 1e6, 1) + " mln";
+    if (a >= 1e9) return sign + trim(a / 1e9, 2) + " mlrd";
+    if (a >= 1e6) return sign + trim(a / 1e6, 1) + " mln";
     if (a >= 1e3) return sign + groups(a);
     return sign + String(Math.round(a));
   }
 
   function trim(x, dp) {
-    var s = x.toFixed(dp);
-    return s.replace(/\.?0+$/, "");
+    return x.toFixed(dp).replace(/\.?0+$/, "");
+  }
+
+  /* Same split as compact(), but with the unit separated so the hero can set
+     it smaller than the numeral. Numbers only — nothing user-authored. */
+  function compactParts(n) {
+    var a = Math.abs(n), sign = n < 0 ? "-" : "";
+    if (a >= 1e9) return { num: sign + trim(a / 1e9, 2), unit: "mlrd" };
+    if (a >= 1e6) return { num: sign + trim(a / 1e6, 1), unit: "mln" };
+    if (a >= 1e3) return { num: sign + groups(a), unit: "" };
+    return { num: sign + String(Math.round(a)), unit: "" };
+  }
+
+  function compactHTML(n) {
+    var p = compactParts(n);
+    return p.unit ? p.num + '<span class="unit">' + p.unit + "</span>" : p.num;
   }
 
   function pct(part, whole) { return whole > 0 ? (part / whole) * 100 : 0; }
@@ -91,6 +108,30 @@
       if (Object.prototype.hasOwnProperty.call(attrs, k)) e.setAttribute(k, attrs[k]);
     }
     return e;
+  }
+
+  /* Counts a figure up on load. The final value is written first, so if the
+     frame callback never runs (background tab) the number is still correct. */
+  function countUp(id, to, format, asHTML) {
+    var el = $(id);
+    if (!el) return;
+
+    function write(s) {
+      if (asHTML) el.innerHTML = s; else el.textContent = s;
+    }
+
+    write(format(to));
+    if (REDUCE || !isFinite(to) || to <= 0) return;
+
+    var started = null;
+    function frame(ts) {
+      if (started === null) started = ts;
+      var p = Math.min((ts - started) / 900, 1);
+      var eased = 1 - Math.pow(1 - p, 4);
+      write(format(to * eased));
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   }
 
   /* ------------------------------------------------------------------- data */
@@ -136,7 +177,6 @@
       clean.push({ t: t, v: v, isReset: hasBal, note: e.note ? String(e.note) : "" });
     });
 
-    // Chronological. Stable for same-day entries (keeps the file's order).
     clean.sort(function (a, b) { return a.t - b.t; });
 
     var running = 0;
@@ -194,7 +234,6 @@
   });
   var paceMonth = recentAdded / (WINDOW_DAYS / 30.436875);
 
-  // Projection basis: real recent pace if there is one, otherwise the average.
   var basis = paceMonth > 0 ? paceMonth : avgMonth;
   var basisLabel = paceMonth > 0 ? "at current pace" : "at average pace";
 
@@ -202,13 +241,13 @@
     if (saved >= target) return { done: true };
     if (!(basis > 0)) return { unknown: true };
     var months = (target - saved) / basis;
-    if (months > 600) return { unknown: true };          // > 50 years: meaningless
+    if (months > 600) return { unknown: true };
     return { months: months, t: now + months * AVG_MONTH };
   }
 
   var etaGoal = etaFor(GOAL);
 
-  /* ------------------------------------------------------------ sidebar/hero */
+  /* --------------------------------------------------------------- rail/hero */
 
   set("sSaved",    compact(saved));
   set("sLeft",     compact(remaining));
@@ -218,18 +257,16 @@
   set("sGapPrice", PRICE > 0 ? compact(gapPrice) : "—");
   set("lastDate",  fmtDate(lastT));
 
-  set("ringPct", Math.round(progress) + "%");
-  var CIRC = 2 * Math.PI * 52;
-  var ringFill = $("ringFill");
-  var ringShown = Math.min(progress, 100) / 100;
+  countUp("ringPct", progress, function (v) { return Math.round(v) + "%"; });
+  countUp("hSaved",  saved,     compactHTML, true);
+  countUp("hLeft",   remaining, compactHTML, true);
 
-  set("hSaved",     compact(saved));
   set("hSavedFull", full(saved));
-  set("hLeft",      compact(remaining));
   set("hLeftFull",  remaining > 0 ? full(remaining) + " to go" : "goal reached");
 
-  // The bar's full width is the goal.
-  set("barGoalLabel", compact(GOAL));
+  set("trackPct",      fmtPct(progress) + " of goal");
+  set("barGoalLabel",  compact(GOAL));
+
   var goalFillPct = Math.min(progress, 100);
 
   var bar = $("bar");
@@ -239,6 +276,20 @@
 
   set("histHint", points.length + (points.length === 1 ? " entry" : " entries") +
                   " · newest first");
+
+  var CIRC = 2 * Math.PI * 68;
+  var ringShown = Math.min(progress, 100) / 100;
+
+  function settle() {
+    $("ringFill").style.strokeDashoffset = String(CIRC * (1 - ringShown));
+    // Slide the full-width fill into place — transform only, no layout per frame.
+    $("barFill").style.transform = "translateX(" + (goalFillPct - 100) + "%)";
+  }
+
+  // Two frames so the starting values are committed and the transition runs;
+  // a timer backs it up, since frame callbacks pause in a background tab.
+  requestAnimationFrame(function () { requestAnimationFrame(settle); });
+  setTimeout(settle, 260);
 
   /* ---------------------------------------------------------- history table */
 
@@ -263,10 +314,10 @@
       td2.className = "num add";
       if (isOpening) {
         td2.textContent = "—";
-        td2.style.color = "var(--text-dim)";
+        td2.style.color = "var(--ink-3)";
       } else if (p.isReset) {
         td2.textContent = (p.added >= 0 ? "+" : "") + compact(p.added);
-        td2.style.color = "var(--price)";
+        td2.style.color = "var(--ink-2)";
       } else {
         td2.textContent = "+" + compact(p.added);
       }
@@ -314,32 +365,72 @@
     return candidates[candidates.length - 1];
   }
 
+  /* Monotone cubic (Fritsch–Carlson). A plain smooth spline would overshoot
+     between entries and draw a balance dipping below one you actually had. */
+  function smoothPath(pts) {
+    var n = pts.length;
+    if (n < 2) return "";
+    if (n === 2) {
+      return "M" + pts[0].x + " " + pts[0].y + " L" + pts[1].x + " " + pts[1].y;
+    }
+
+    var i, d = [], m = [];
+    for (i = 0; i < n - 1; i++) {
+      var dx = pts[i + 1].x - pts[i].x;
+      d.push(dx === 0 ? 0 : (pts[i + 1].y - pts[i].y) / dx);
+    }
+    m.push(d[0]);
+    for (i = 1; i < n - 1; i++) {
+      m.push(d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2);
+    }
+    m.push(d[n - 2]);
+
+    for (i = 0; i < n - 1; i++) {
+      if (d[i] === 0) { m[i] = 0; m[i + 1] = 0; continue; }
+      var a = m[i] / d[i], b = m[i + 1] / d[i];
+      var s = a * a + b * b;
+      if (s > 9) {
+        var tau = 3 / Math.sqrt(s);
+        m[i] = tau * a * d[i];
+        m[i + 1] = tau * b * d[i];
+      }
+    }
+
+    var out = "M" + pts[0].x.toFixed(2) + " " + pts[0].y.toFixed(2);
+    for (i = 0; i < n - 1; i++) {
+      var h = (pts[i + 1].x - pts[i].x) / 3;
+      out += " C" + (pts[i].x + h).toFixed(2) + " " + (pts[i].y + m[i] * h).toFixed(2) +
+             " " + (pts[i + 1].x - h).toFixed(2) + " " + (pts[i + 1].y - m[i + 1] * h).toFixed(2) +
+             " " + pts[i + 1].x.toFixed(2) + " " + pts[i + 1].y.toFixed(2);
+    }
+    return out;
+  }
+
   function drawChart() {
     var w = Math.max(host.clientWidth || 640, 260);
-    var h = Math.round(Math.min(Math.max(w * 0.42, 230), 340));
+    var narrow = w < 460;
+    var h = Math.round(Math.min(Math.max(w * 0.4, 230), 330));
 
-    var padL = w < 420 ? 44 : 62;
-    var padR = w < 420 ? 12 : 54;      // room for the goal-line label
-    var padT = 16;
-    var padB = 30;
+    var padL = narrow ? 42 : 56;
+    var padR = narrow ? 10 : 52;
+    var padT = 14;
+    var padB = 32;
 
     var innerW = Math.max(w - padL - padR, 40);
     var innerH = Math.max(h - padT - padB, 40);
 
-    // ---- scales
     var xMin = firstT;
     var xMax = Math.max(lastT, now);
 
-    // Extend the axis toward the projected goal date — but never so far that
-    // the actual history gets squashed into a corner. The projection may run
-    // off the right edge (it is clipped); the date itself is on the card.
+    // Extend toward the projected goal date, but never so far that the real
+    // history is squashed into a corner. The ray is clipped at the edge.
     var proj = null;
     if (!etaGoal.done && !etaGoal.unknown && etaGoal.months <= 36) {
       proj = etaGoal.t;
       var allowance = Math.max((xMax - xMin) * 0.6, 50 * DAY);
       xMax = Math.min(proj, xMax + allowance);
     }
-    if (xMax - xMin < 20 * DAY) xMax = xMin + 20 * DAY;   // single/short history
+    if (xMax - xMin < 20 * DAY) xMax = xMin + 20 * DAY;
 
     var yMaxRaw = Math.max(GOAL, saved) * 1.08;
     var step = niceStep(yMaxRaw);
@@ -354,19 +445,18 @@
       role: "img",
       "aria-label": "Balance over time, from " + compact(points[0].balance) +
                     " in " + fmtMonthYear(firstT) + " to " + compact(saved) +
-                    " in " + fmtMonthYear(lastT) + ", against a " + compact(GOAL) + " goal."
+                    " in " + fmtMonthYear(lastT) + ", against a " +
+                    compact(GOAL) + " goal."
     });
 
-    // Gradient for the area fill.
     var defs = svgEl("defs", {});
-    var grad = svgEl("linearGradient", { id: "cGrad", x1: "0", y1: "0", x2: "0", y2: "1" });
+    var grad = svgEl("linearGradient", { id: "cFill", x1: "0", y1: "0", x2: "0", y2: "1" });
     grad.appendChild(svgEl("stop", { offset: "0",
-      "stop-color": "var(--accent)", "stop-opacity": ".28" }));
+      "stop-color": "var(--accent)", "stop-opacity": ".20" }));
     grad.appendChild(svgEl("stop", { offset: "1",
       "stop-color": "var(--accent)", "stop-opacity": "0" }));
     defs.appendChild(grad);
 
-    // Keeps the projection ray inside the plot area when it runs off the edge.
     var clip = svgEl("clipPath", { id: "cClip" });
     clip.appendChild(svgEl("rect", {
       x: padL, y: padT - 4, width: innerW, height: innerH + 4
@@ -374,20 +464,21 @@
     defs.appendChild(clip);
     svg.appendChild(defs);
 
-    // ---- y gridlines + labels
+    // ---- horizontal rules only; no vertical grid, no frame
     for (var v = 0; v <= yMax + 1; v += step) {
       var y = Y(v);
       svg.appendChild(svgEl("line", {
-        class: "c-grid", x1: padL, y1: y, x2: padL + innerW, y2: y
+        class: v === 0 ? "c-base" : "c-grid",
+        x1: padL, y1: y, x2: padL + innerW, y2: y
       }));
       var lbl = svgEl("text", {
-        class: "c-axis-text", x: padL - 8, y: y + 4, "text-anchor": "end"
+        class: "c-axis", x: padL - 10, y: y + 3.5, "text-anchor": "end"
       });
       lbl.textContent = v === 0 ? "0" : compact(v);
       svg.appendChild(lbl);
     }
 
-    // ---- x ticks: first of each month, thinned to fit
+    // ---- month ticks, thinned to fit
     var ticks = [];
     var cur = new Date(xMin);
     cur = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth(), 1));
@@ -396,17 +487,16 @@
       if (tt >= xMin) ticks.push(tt);
       cur = new Date(Date.UTC(cur.getUTCFullYear(), cur.getUTCMonth() + 1, 1));
     }
-    var maxTicks = Math.max(2, Math.floor(innerW / (w < 420 ? 58 : 74)));
+    var maxTicks = Math.max(2, Math.floor(innerW / (narrow ? 56 : 76)));
     var every = Math.ceil(ticks.length / maxTicks);
     ticks.forEach(function (tt, i) {
       if (i % every !== 0) return;
-      var tx = X(tt);
       var t1 = svgEl("text", {
-        class: "c-axis-text", x: tx, y: padT + innerH + 19, "text-anchor": "middle"
+        class: "c-axis", x: X(tt), y: padT + innerH + 20, "text-anchor": "middle"
       });
-      var d = new Date(tt);
-      t1.textContent = MONTHS[d.getUTCMonth()] +
-        (d.getUTCMonth() === 0 || i === 0 ? " " + String(d.getUTCFullYear()).slice(2) : "");
+      var dd = new Date(tt);
+      t1.textContent = MONTHS[dd.getUTCMonth()] +
+        (dd.getUTCMonth() === 0 || i === 0 ? " " + String(dd.getUTCFullYear()).slice(2) : "");
       svg.appendChild(t1);
     });
 
@@ -415,104 +505,83 @@
     svg.appendChild(svgEl("line", {
       class: "c-goal", x1: padL, y1: gy, x2: padL + innerW, y2: gy
     }));
-    if (padR > 20) {
-      var gl = svgEl("text", {
-        class: "c-goal-text", x: padL + innerW + 6, y: gy + 4
-      });
+    if (!narrow) {
+      var gl = svgEl("text", { class: "c-goal-text", x: padL + innerW + 9, y: gy + 3.5 });
       gl.textContent = compact(GOAL);
       svg.appendChild(gl);
     }
 
-    // ---- real price line, only when it is actually on the scale
+    // ---- the real house price, drawn only when it falls on the scale
     if (PRICE > 0 && PRICE <= yMax) {
       var py = Y(PRICE);
       svg.appendChild(svgEl("line", {
-        class: "c-price", x1: padL, y1: py, x2: padL + innerW, y2: py
+        class: "c-goal", x1: padL, y1: py, x2: padL + innerW, y2: py
       }));
-      if (padR > 20) {
-        var pl = svgEl("text", {
-          class: "c-price-text", x: padL + innerW + 6, y: py + 4
-        });
+      if (!narrow) {
+        var pl = svgEl("text", { class: "c-goal-text", x: padL + innerW + 9, y: py + 3.5 });
         pl.textContent = compact(PRICE);
         svg.appendChild(pl);
       }
     }
 
-    // ---- balance path (step-less polyline through the entries)
-    var d = "", i2;
-    for (i2 = 0; i2 < points.length; i2++) {
-      d += (i2 ? " L" : "M") + X(points[i2].t).toFixed(2) + " " + Y(points[i2].balance).toFixed(2);
-    }
+    // ---- balance curve
+    var xy = points.map(function (p) { return { x: X(p.t), y: Y(p.balance) }; });
     // Carry the last balance forward to today so the line does not stop short.
-    var carried = false;
-    if (now > lastT + DAY) {
-      d += " L" + X(now).toFixed(2) + " " + Y(saved).toFixed(2);
-      carried = true;
-    }
+    var carried = now > lastT + DAY;
+    if (carried) xy.push({ x: X(now), y: Y(saved) });
 
-    if (points.length > 1 || carried) {
-      var areaD = d + " L" + X(carried ? now : lastT).toFixed(2) + " " + Y(0).toFixed(2) +
-                  " L" + X(firstT).toFixed(2) + " " + Y(0).toFixed(2) + " Z";
+    if (xy.length > 1) {
+      var line = smoothPath(xy);
+      var areaD = line + " L" + xy[xy.length - 1].x.toFixed(2) + " " + Y(0).toFixed(2) +
+                  " L" + xy[0].x.toFixed(2) + " " + Y(0).toFixed(2) + " Z";
       svg.appendChild(svgEl("path", { class: "c-area", d: areaD }));
-      svg.appendChild(svgEl("path", { class: "c-line", d: d }));
+      svg.appendChild(svgEl("path", { class: "c-line", d: line }));
     }
 
-    // ---- projection to the goal (clipped; may leave the right edge)
+    // ---- projection toward the goal (clipped; may leave the right edge)
     if (proj) {
       var g = svgEl("g", { "clip-path": "url(#cClip)" });
       g.appendChild(svgEl("path", {
         class: "c-proj",
-        d: "M" + X(carried ? now : lastT).toFixed(2) + " " + Y(saved).toFixed(2) +
+        d: "M" + xy[xy.length - 1].x.toFixed(2) + " " + xy[xy.length - 1].y.toFixed(2) +
            " L" + X(proj).toFixed(2) + " " + Y(GOAL).toFixed(2)
       }));
       svg.appendChild(g);
-
-      // Only mark the landing point when it actually sits on the axis.
-      if (proj <= xMax) {
-        var pdot = svgEl("circle", {
-          class: "c-dot", cx: X(proj).toFixed(2), cy: Y(GOAL).toFixed(2), r: 3.5,
-          "stroke-dasharray": "2 2"
-        });
-        var pt = svgEl("title", {});
-        pt.textContent = "Projected: goal reached around " + fmtMonthYear(proj) +
-                         " " + basisLabel;
-        pdot.appendChild(pt);
-        svg.appendChild(pdot);
-      }
     }
 
-    // ---- dots, with native tooltips (works on hover and on long-press)
+    // ---- entry dots, knocked out of the curve
     points.forEach(function (p) {
       var cx = X(p.t), cy = Y(p.balance);
-      var dot = svgEl("circle", { class: "c-dot", cx: cx.toFixed(2), cy: cy.toFixed(2),
-                                  r: points.length > 24 ? 2.5 : 4 });
+      var r = points.length > 24 ? 2.6 : 3.6;
+
+      svg.appendChild(svgEl("circle", {
+        class: "c-dot-halo", cx: cx.toFixed(2), cy: cy.toFixed(2), r: r + 2.6
+      }));
+      svg.appendChild(svgEl("circle", {
+        class: "c-dot", cx: cx.toFixed(2), cy: cy.toFixed(2), r: r
+      }));
+
+      // A larger invisible target, so the tooltip is reachable on a phone.
+      var hit = svgEl("circle", { class: "c-hit", cx: cx.toFixed(2), cy: cy.toFixed(2), r: 16 });
       var ti = svgEl("title", {});
       ti.textContent = fmtDate(p.t) + " — " + full(p.balance) +
-                       (p.isReset ? " (balance set)"
-                                  : " (+" + compact(p.added) + ")") +
+                       (p.isReset ? " (balance set)" : " (+" + compact(p.added) + ")") +
                        (p.note ? " · " + p.note : "");
-      dot.appendChild(ti);
-      svg.appendChild(dot);
-
-      // Bigger invisible target so the tooltip is reachable on a phone.
-      var hit = svgEl("circle", { class: "c-hit", cx: cx.toFixed(2), cy: cy.toFixed(2), r: 14 });
-      hit.appendChild(ti.cloneNode(true));
+      hit.appendChild(ti);
       svg.appendChild(hit);
     });
 
-    host.innerHTML = "";
-    host.appendChild(svg);
+    host.replaceChildren(svg);
 
     var hint = points.length > 1
       ? "Dashed line is the " + compact(GOAL) + " goal"
-      : "Add more entries to see the curve";
-    if (proj) hint += " · faint line projects toward " + fmtMonthYear(proj);
+      : "One entry so far — add a few more to see the curve";
+    if (proj) hint += " · projecting " + fmtMonthYear(proj);
     set("chartHint", hint);
   }
 
   drawChart();
 
-  // Redraw on resize / orientation change, debounced.
   var rt;
   function onResize() {
     clearTimeout(rt);
@@ -521,25 +590,11 @@
   window.addEventListener("resize", onResize);
   window.addEventListener("orientationchange", onResize);
 
-  /* ------------------------------------------------------- animate on load */
-
-  function fillBars() {
-    ringFill.style.strokeDashoffset = String(CIRC * (1 - ringShown));
-    $("barFill").style.width = goalFillPct + "%";
-  }
-
-  // Two frames so the starting values are committed and the CSS transition
-  // actually runs. requestAnimationFrame is paused in a background tab, so a
-  // timer backs it up — the bars must never be left sitting at zero.
-  requestAnimationFrame(function () { requestAnimationFrame(fillBars); });
-  setTimeout(fillBars, 250);
-
   /* -------------------------------------------------------- theme switcher */
 
   (function theme() {
     var order = ["auto", "light", "dark"];
-    var icons = { auto: "◐", light: "☀", dark: "☽" };
-    var names = { auto: "Auto theme", light: "Light", dark: "Dark" };
+    var names = { auto: "Auto", light: "Light", dark: "Dark" };
     var KEY = "houseSavings.theme";
 
     var mode = "auto";
@@ -548,13 +603,15 @@
       if (order.indexOf(stored) !== -1) mode = stored;
     } catch (e) { /* private mode, blocked storage — stay on auto */ }
 
+    var btn = $("themeBtn");
+
     function apply() {
       document.documentElement.setAttribute("data-theme", mode);
-      set("themeIcon", icons[mode]);
       set("themeLabel", names[mode]);
+      btn.setAttribute("aria-label", "Theme: " + names[mode] + ". Change theme.");
     }
 
-    $("themeBtn").addEventListener("click", function () {
+    btn.addEventListener("click", function () {
       mode = order[(order.indexOf(mode) + 1) % order.length];
       try { localStorage.setItem(KEY, mode); } catch (e) { /* ignore */ }
       apply();

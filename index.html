@@ -2,129 +2,139 @@
 <html lang="en" data-theme="auto">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>House Savings</title>
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbfbf9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a0b0e" media="(prefers-color-scheme: dark)">
 <link rel="stylesheet" href="styles.css">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏡</text></svg>">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234fd1a1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.5 12 3l9 7.5'/%3E%3Cpath d='M5.5 9.5V20h13V9.5'/%3E%3C/svg%3E">
 </head>
 <body>
 
+<a class="skip" href="#main">Skip to content</a>
+
 <div class="layout">
 
-  <!-- ============================ SIDEBAR ============================ -->
-  <aside class="sidebar">
+  <!-- ============================== RAIL ============================== -->
+  <aside class="rail">
+
     <header class="brand">
-      <span class="brand-mark" aria-hidden="true">🏡</span>
-      <div>
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 10.5 12 3l9 7.5"/>
+          <path d="M5.5 9.5V20h13V9.5"/>
+        </svg>
+      </span>
+      <span class="brand-text">
         <h1>House Savings</h1>
-        <p class="brand-sub">Progress to the sweet spot</p>
-      </div>
+        <span class="brand-sub">Progress to the sweet spot</span>
+      </span>
     </header>
 
-    <div class="ring-wrap">
-      <svg class="ring" viewBox="0 0 120 120" role="img" aria-labelledby="ringLabel">
-        <title id="ringLabel">Percent of goal saved</title>
-        <circle class="ring-track" cx="60" cy="60" r="52"></circle>
-        <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"></circle>
+    <div class="dial">
+      <svg class="dial-svg" viewBox="0 0 160 160" aria-hidden="true" focusable="false">
+        <g class="dial-rotor">
+          <circle class="dial-track" cx="80" cy="80" r="68"/>
+          <circle class="dial-fill" id="ringFill" cx="80" cy="80" r="68"/>
+        </g>
       </svg>
-      <div class="ring-text">
-        <strong id="ringPct">—</strong>
+      <p class="dial-read">
+        <strong id="ringPct">0%</strong>
         <span>of goal</span>
-      </div>
+      </p>
     </div>
 
-    <dl class="stats">
-      <div class="stat stat-accent">
+    <dl class="figures">
+      <div class="figure is-accent">
         <dt>Saved</dt>
         <dd id="sSaved">—</dd>
       </div>
-      <div class="stat stat-warn">
+      <div class="figure is-warm">
         <dt>Left to goal</dt>
         <dd id="sLeft">—</dd>
       </div>
-      <div class="stat">
+      <div class="figure">
         <dt>Goal</dt>
         <dd id="sGoal">—</dd>
       </div>
-      <div class="stat">
+      <div class="figure">
         <dt>Complete</dt>
         <dd id="sPct">—</dd>
       </div>
-      <div class="stat stat-divider">
-        <dt>Real house price</dt>
+      <div class="figure is-parted">
+        <dt>House price</dt>
         <dd id="sPrice">—</dd>
       </div>
-      <div class="stat">
-        <dt>Gap to real price</dt>
+      <div class="figure">
+        <dt>Gap to price</dt>
         <dd id="sGapPrice">—</dd>
       </div>
     </dl>
 
-    <footer class="side-foot">
-      <button id="themeBtn" class="theme-btn" type="button" aria-live="polite">
-        <span id="themeIcon" aria-hidden="true">◐</span>
-        <span id="themeLabel">Auto theme</span>
+    <footer class="rail-foot">
+      <button id="themeBtn" class="theme" type="button">
+        <span class="theme-dot" id="themeIcon" aria-hidden="true"></span>
+        <span id="themeLabel">Auto</span>
       </button>
-      <p class="updated">Last entry <span id="lastDate">—</span></p>
+      <p class="stamp">Last entry <span id="lastDate">—</span></p>
     </footer>
+
   </aside>
 
-  <!-- ============================== MAIN ============================= -->
-  <main class="main">
+  <!-- ============================== MAIN ============================== -->
+  <main class="main" id="main">
 
-    <!-- Hero: saved / remaining / progress bar -->
     <section class="hero" aria-labelledby="heroH">
       <h2 id="heroH" class="sr-only">Overall progress</h2>
 
-      <div class="hero-nums">
-        <div class="hero-block">
-          <span class="hero-label">Saved so far</span>
-          <strong class="hero-big" id="hSaved">—</strong>
-          <span class="hero-sub" id="hSavedFull">—</span>
+      <div class="hero-grid">
+        <div class="hero-lead">
+          <p class="eyebrow">Saved so far</p>
+          <p class="xl" id="hSaved">—</p>
+          <p class="sub" id="hSavedFull">—</p>
         </div>
-        <div class="hero-block hero-right">
-          <span class="hero-label">Still to go</span>
-          <strong class="hero-big hero-big-warn" id="hLeft">—</strong>
-          <span class="hero-sub" id="hLeftFull">—</span>
+        <div class="hero-trail">
+          <p class="eyebrow">Still to go</p>
+          <p class="lg" id="hLeft">—</p>
+          <p class="sub" id="hLeftFull">—</p>
         </div>
       </div>
 
-      <div class="bar-wrap">
-        <div class="bar-row">
-          <span class="bar-cap">goal</span>
-          <div class="bar" role="progressbar" aria-label="Progress to the goal"
-               aria-valuemin="0" aria-valuemax="100" id="bar">
-            <div class="bar-fill" id="barFill"></div>
-          </div>
-          <span class="bar-end" id="barGoalLabel">—</span>
+      <div class="track-wrap">
+        <div class="track" id="bar" role="progressbar" aria-labelledby="heroH"
+             aria-valuemin="0" aria-valuemax="100">
+          <div class="track-fill" id="barFill"></div>
         </div>
+        <p class="track-legend">
+          <span id="trackPct">—</span>
+          <span id="barGoalLabel">—</span>
+        </p>
       </div>
     </section>
 
-    <!-- Chart -->
-    <section class="panel" aria-labelledby="chartH">
-      <div class="panel-head">
-        <h2 id="chartH">Balance over time</h2>
-        <span class="panel-hint" id="chartHint"></span>
+    <section class="block" aria-labelledby="chartH">
+      <div class="block-head">
+        <h2 id="chartH">Balance Over Time</h2>
+        <p class="block-note" id="chartHint"></p>
       </div>
       <div class="chart-host" id="chartHost"></div>
     </section>
 
-    <!-- History -->
-    <section class="panel" aria-labelledby="histH">
-      <div class="panel-head">
+    <section class="block" aria-labelledby="histH">
+      <div class="block-head">
         <h2 id="histH">History</h2>
-        <span class="panel-hint" id="histHint"></span>
+        <p class="block-note" id="histHint"></p>
       </div>
-      <div class="table-scroll">
+      <div class="table-wrap">
         <table class="hist">
           <thead>
             <tr>
               <th scope="col">Date</th>
               <th scope="col" class="num">Added</th>
               <th scope="col" class="num">Balance</th>
-              <th scope="col" class="num">% of goal</th>
+              <th scope="col" class="num">Of Goal</th>
               <th scope="col">Note</th>
             </tr>
           </thead>
@@ -133,13 +143,13 @@
       </div>
     </section>
 
-    <p class="foot-note">
-      Edit <code>data.js</code>, commit, push — this page recalculates everything from it.
+    <p class="colophon">
+      Edit <code translate="no">data.js</code>, commit, push — this page recalculates everything from it.
     </p>
   </main>
 </div>
 
-<div id="dataError" class="data-error" hidden></div>
+<div id="dataError" class="alert" role="alert" aria-live="polite" hidden></div>
 
 <script src="data.js"></script>
 <script src="app.js"></script>

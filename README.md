@@ -41,7 +41,12 @@ git add data.js && git commit -m "savings: Dec 2026" && git push
 ```
 
 GitHub Pages redeploys in about a minute. Reload the page and everything —
-the bars, the ring, the chart, the projected date — has moved.
+the bar, the dial, the chart, the projected date — has moved.
+
+**If the numbers look unchanged after a push,** it is the browser's cache
+holding the old `data.js`, not a failed deploy. GitHub Pages lets browsers
+keep files for about ten minutes. Force a reload to see it immediately:
+`Cmd+Shift+R` on a Mac, `Ctrl+F5` on Windows, or pull-to-refresh on a phone.
 
 ### If you get out of sync with your bank
 
