@@ -30,8 +30,8 @@ window.SAVINGS = {
   currency: "so'm",
 
   entries: [
-    // Deposits from mid-August to today. These add up to 150 000 000 —
-    // the real total — but the split between them is approximate.
+    // History up to 19 Nov: these eight add up to 150 000 000, the balance
+    // on that date. The split between the dates is approximate.
     { date: "2026-08-15", amount: 17_500_000 },
     { date: "2026-08-29", amount: 21_000_000 },
     { date: "2026-09-12", amount: 15_500_000 },
@@ -41,7 +41,7 @@ window.SAVINGS = {
     { date: "2026-11-04", amount: 21_500_000 },
     { date: "2026-11-19", amount: 22_000_000 },
 
-    // From here on, one line per deposit:
-    //   { date: "2026-12-05", amount: 12_000_000 },
+    // Logged as they happen from here:
+    { date: "2026-11-21", amount: 26_000_000 },
   ],
 };
